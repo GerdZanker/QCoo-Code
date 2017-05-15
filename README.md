@@ -65,9 +65,9 @@ TOC
 
 |Item Name|Version Number|Remarks Modification|Date      |Modifier|
 |---------|--------------|--------------------|----------|--------|
-|QCoo |2.0.2 |Complete all used protocols     |2016.09.01|Liang Yu|
-|QCoo |2.0.3 |modify LED0 error               |2016.09.21|Liang Yu|
-|QCoo |2.0.4 |KS Version: Modified baud rate  |2017.01.03|Liang Yu|
+|QCoo     |2.0.2 |Complete all used protocols     |2016.09.01|Liang Yu|
+|QCoo     |2.0.3 |modify LED0 error               |2016.09.21|Liang Yu|
+|QCoo     |2.0.4 |KS Version: Modified baud rate  |2017.01.03|Liang Yu|
 
 (page 2)
 
@@ -90,7 +90,7 @@ The other is the intelligent device to send a query command to query the current
 The following protocol content will be based on the above two categories, divided into the implementation of class and query class. The customization of the communication protocol determines the communication efficiency and the efficient communication can be guaranteed
 The show shows the real-time, experience will be good.
 
-### First, the implementation of class:
+### 1. the implementation of class:
 
 1. Control the LED method 1
 2. Control LED method 2
@@ -109,7 +109,7 @@ The show shows the real-time, experience will be good.
 (page 3)
 
 
-### Second, the query categories:
+### 2. the query categories:
 13. Query the color
 14. Query the voltage
 15. Check the charging status
@@ -126,7 +126,7 @@ QCoo hardware has 30 colors exist in the hardware local, numbered 0x00 ~ 0x29;
 QCoo hardware set the brightness of the standard is 0 to 255, brightness increased sequentially, expressed in hexadecimal to 0x00 ~ 0xFF;
 QCoo hardware for standard serial communication, the default baud rate is 9600;
 
-## First, control LED method 1: 0x41
+### 1. control LED method 1: 0x41
 
 |Start code |length identification |command ID |action |command word |color code |lamp number |
 |-----------|----------------------|-----------|-------|-------------|-----------|------------|
@@ -141,7 +141,7 @@ Send the above data: F05505410241017D to QCoo hardware
 
 (page 4)
 
-## Second, control LED method 2: 0x11
+## 2. control LED method 2: 0x11
 
 
 |Start code |length identification |command ID |action |command word |Face number |color coding |Data 1 |Data 2 |Data 3 |Data 4|
@@ -155,7 +155,7 @@ Send the above data: F05509000211010101020201 to QCoo Hardware:
 4. Note: The four data on how to obtain, QCoo team designed a special software, used to generate data 1 ~ data 4. three,
 
 
-## Third, control LED method 3: 0x14
+### 3. control LED method 3: 0x14
 
 |Start Code |length identification |command ID |action |command word |Face number |color coding |
 |-----------|----------------------|-----------|-------|-------------|------------|-------------|
@@ -168,7 +168,7 @@ Send data F055050002130112 to QCoo hardware:
 4. The order is suitable for brushing a separate face, making special effects.
 
 
-## Fourth, refresh display: 0x03
+### 4. refresh display: 0x03
 
 |Start code |length identification |command ID |action |command word |
 |-----------|----------------------|-----------|-------|-------------|
@@ -182,6 +182,123 @@ Send F05503000203 to QCoo hardware:
 Fives,
 
 (page 5)
+
+## 5. set the brightness: 0x20
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x04         |0x20     |
+
+Send F0550400020420 to QCoo hardware:
+1. Effect: After receiving the command to get the parameters to set the brightness, and then set the brightness of QCoo hardware, and then refresh the display.
+2. Parameters: The global brightness is set to 32 for the corresponding decimal data of parameter 0x20.
+3. Return value: F0 55 01 00 10 0D 0A
+4. Note: the display will be refreshed in real time, when set the brightness of 0x00 when the QCoo will not accept, the minimum brightness of 0x0A (decimal 10), the purpose is to prevent the wrong set brightness, the subsequent display can not render the effect.
+
+### 6. special effects switch: 0x05
+
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x05         |0x01     |
+
+Send F0550400020501 to QCoo hardware:
+1. Effect: switch to the special effects mode, and show the effects of special effects 1, the command word 0x05 represents the significance of switching effects.
+2. Parameters: parameter 0x01 represents the switch to the effects, the hardware set up six effects, but the actual use of the four effects
+It is worth noting that the effect is off when the parameter is 0x00
+3. Return value: F0 55 01 00 10 0D 0A
+4. Note: When you are ready to jump out from the effects inside to remember to turn off the effects, and then send other commands to make sense. The command to turn off effects is
+F0550400020500.
+
+### 7. shut down: 0x15
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x05         |0x0A     |
+
+Send F055040002050A to QCoo hardware:
+1. Effect: After receiving the command, immediately shut down, no return value.
+2. Parameters: parameter 0x0A no practical significance, the purpose is to prevent the analysis is wrong, false shutdown.
+3. Return value: F0 55 01 00 10 0D 0A
+4. Note: After all the operation is invalid, you need to shake and shake to start QCoo.
+
 (page 6)
+
+### 8. motor vibration: 0x16
+|Start code |length identification |command ID |action |command word |vibration intensity|vibration time|
+|-----------|----------------------|-----------|-------|-------------|-------------------|--------------|
+|0xF0 0x55  |0x05                  |0x00       |0x02   |0x16         |0x7D               |0xFF          |
+
+Send F055050002167DFF to QCoo Hardware:
+1. Effect: After receiving the instruction the motor starts to shake, the intensity of vibration is 0x7D, the duration of vibration is 0xFF;
+2. Parameters: vibration intensity from 0x00 ~ 0xFF, vibration increased in turn, vibration duration from 0x00 ~ 0xFF followed by growth.
+3. Return value: F0 55 01 00 10 0D 0A
+4. Note: motor vibration for the independent behavior, does not affect the implementation of other instructions
+
+### 9. set the connection status: 0x20
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x20        |0x01     |
+
+Send F0550400022001 to QCoo hardware
+1. Effect: QCoo will enter the working state after receiving this command.
+2. Parameters: The meaning of parameter 0x01 is that the APP is actively connected to the QCoo hardware. The meaning of parameter 0x00 is that the APP is actively disconnected from QCoo
+3. Return Value: F0 55 01 00 10 0D 0A
+4. Note: Only after the success of all the commands are meaningful, in the new version of the firmware can also skip the connection, send the command directly. When APP is sent
+F0550400022000 to QCoo, if three minutes did not connect QCoo and did not move QCoo, QCoo hardware will automatically shut down, lower Power consumption.
+
 (page 7)
+
+### 10. save the brightness: 0x45
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x45         |0x3c     |
+
+Send F055040002453C to QCoo hardware:
+1. Effect: QCoo no obvious effect, but the current parameters of the brightness stored in the EEPROM inside, after the restart the brightness information will not be lost.
+2. Parameters: The parameter stores the information of the brightness, from 0x00 to 0xFF (the actual effect starts at 0x0A)
+3. Return Value: F0 55 01 00 10 0D 0A
+4. Note: This command stores the information in the EEPROM, each time the power-on QCoo hardware goes back to read the brightness information as the initialization brightness.
+
+### 11. dice mode: 0x42
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x42         |0x01     |
+
+Send F0550400024201 to QCoo hardware:
+1. Effect: QCoo hardware will enter the dice mode, pick up QCoo can be used when the dice.
+2. Parameters: There are two parameters of the command, 0x01 on behalf of the dice into the command, 0x00 on behalf of the exit dice command.
+3. Return Value: F0 55 01 00 10 0D 0A
+4. Note: This mode can trigger QCoo built-in dice mode, exit the need to send F0550400024201 to QCoo hardware.
+
+### 12. initialize the gyroscope: 0x43
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x43         |0x01     |
+
+Send F0550400024301 to QCoo Hardware:
+1. Effect: QCoo will automatically initialize the attitude sensor once.
+2. Parameters: 0x01 does not make sense, just to prevent false triggering.
+3. Return Value: F0 55 01 00 10 0D 0A
+4. Note: Sometimes the IIC bus will break with the attitude sensor, if found this situation, then send the command will resume communication.
+
 (page 8)
+
+### 13. query voltage: 0x17
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x17         |0x0A     |
+
+Send F055040002170A to QCoo hardware:
+1. Effect: no practical effect, in the APP side will receive the Bluetooth Notify message, the contents of the current QCoo voltage, the form of a string
+2. Parameters: 0x0A no practical significance, just to prevent false triggering
+3. Return value: voltage value, for example: 4.2; this return value for the string mode
+4. Note: This voltage value can roughly reflect the battery power status, receive attention is the string type.
+
+### 14. query charging status: 0x18
+|Start code |length identification |command ID |action |command word |parameter|
+|-----------|----------------------|-----------|-------|-------------|---------|
+|0xF0 0x55  |0x04                  |0x00       |0x02   |0x18         |0x0A     |
+
+Send F055040002180A to QCoo Hardware:
+1. Effect: no practical effect, in the APP side will receive the Bluetooth Notify message, the contents of the current QCoo charging state, the form of a string.
+2. Parameters: 0x0A no practical significance, just to prevent false triggering.
+3. Return value: The charge status value, "0" means no charge, "1" represents charge.
+4. Note: APP did not use the directive, only for the developer reference, with the voltage query, then you can predict the battery charge status (saturated or in charge)
