@@ -42,9 +42,9 @@ The following protocol defines the supported commands and queries:
 
 ### 1. Commands
 
-1. Control LED method 1 - LED index
-2. Control LED method 2 -
-3. Control LED method 3 - Face number
+1. Control LED method 1 - LED by index
+2. Control LED method 2 - LEDs by face and bitpattern
+3. Control LED method 3 - All LEDs
 4. Refresh display
 5. Set brightness
 6. Change effects
@@ -62,6 +62,14 @@ The following protocol defines the supported commands and queries:
 15. Query charging status
 
 
+### More commands
+
+Implemented command available in code, but not part of official protocol. The LED commands need a refresh to see the changes on the QCOO.
+
+16. Control LED method - All LEDs of a single face
+17. Control LED method - All LEDs
+
+
 ## Protocol data format
 
 |Start code 1 |start code 2 |length                           | Cmd ID   | action                    | Command        | Data               |
@@ -75,7 +83,7 @@ QCoo has 256 brightness levels between 0x00 - 0xFF, brightness values less than 
 QCoo has a hardware serial port and communication baud rate is 9600
 
 
-### 1. control LED method 1: 0x41
+### 1. control LED method 1: 0x41 - LED by index
 
 |Start code |length |Cmd ID |action |command |color index |LED number |
 |-----------|-------|-------|-------|--------|------------|-----------|
@@ -89,7 +97,7 @@ Send ``F05505000241017D`` to QCoo hardware
 4. Note: This command is suitable for one operation of a LED, especially for snake display.
 
 
-### 2. control LED method 2: 0x11
+### 2. control LED method 2: 0x11 - LEDs by face and bitpattern
 
 |Start code |length |Cmd ID |action |command |face number |color index |Data 1 |Data 2 |Data 3 |Data 4|
 |-----------|-------|-------|-------|--------|------------|------------|-------|-------|-------|------|
@@ -102,7 +110,7 @@ Send ``F05509000211010101020201`` to QCoo Hardware:
 4. Note: About the data 1 - 4 details, see the Software of QCoo Team
 
 
-### 3. control LED method 3: 0x14
+### 3. control LED method 3: 0x14 - All LEDs
 
 |Start code |length |Cmd ID |action |command |color index |
 |-----------|-------|-------|-------|--------|------------|
@@ -113,32 +121,6 @@ Send data ``F055040002140112`` to QCoo hardware:
 2. Parameters: The parameter color index 0x12 represents the color in the color pallet.
 3. Return Value: None
 4. The command is suitable for brushing a single face, making special effects.
-
-
-### FROM CODE control LED method 4: 0x13
-
-|Start code |length |Cmd ID |action |command |color index |
-|-----------|-------|-------|-------|--------|------------|
-|0XF0 0x55  |0x04   |0x00   |0x02   |0x14    | 0x10       |
-
-Send data ``F0550400021310`` to QCoo hardware:
-1. Effect: All the LEDs color are marked for color index 0x10.
-2. Parameters: The parameter color index 0x10 represents the color in the color pallet, a blue color.
-3. Return Value: None
-4. A REFRESH (command 03) is necessary to show the color.
-
-
-### FROM CODE control LED method 4: 0x12
-
-|Start code |length |Cmd ID |action |command |Face number |color index |
-|-----------|-------|-------|-------|--------|------------|------------|
-|0XF0 0x55  |0x04   |0x00   |0x02   |0x12    |0x01        | 0x12       |
-
-Send data ``F055050002120112`` to QCoo hardware:
-1. Effect: All the LEDs color in face 1 turned to color index 0x12
-2. Parameters: Face number 0x01 represents the first face, the parameter color index 0x12 represents the color in the color pallet.
-3. Return Value: None
-4. A REFRESH (command 03) is necessary to show the color. The command is suitable for brushing a single face, making special effects.
 
 
 ### 4. refresh display: 0x03
@@ -277,6 +259,32 @@ Send ``F055040002180A`` to QCoo Hardware:
 2. Parameters: 0x0A has no meaning, just to prevent false triggering.
 3. Return value: The charge status value: "0" means no charge, "1" represents charging.
 4. Note: Smart device shall Not use this command. Only developers shall query the charging state if necessary.
+
+
+### 15. control LED method 4: 0x13
+
+|Start code |length |Cmd ID |action |command |color index |
+|-----------|-------|-------|-------|--------|------------|
+|0XF0 0x55  |0x04   |0x00   |0x02   |0x14    | 0x10       |
+
+Send data ``F0550400021310`` to QCoo hardware:
+1. Effect: All the LEDs color are marked for color index 0x10.
+2. Parameters: The parameter color index 0x10 represents the color in the color pallet, a blue color.
+3. Return Value: None
+4. A REFRESH display (command ID 03) is necessary to show the color.
+
+
+### 16. control LED method 4: 0x12
+
+|Start code |length |Cmd ID |action |command |Face number |color index |
+|-----------|-------|-------|-------|--------|------------|------------|
+|0XF0 0x55  |0x04   |0x00   |0x02   |0x12    |0x01        | 0x12       |
+
+Send data ``F055050002120112`` to QCoo hardware:
+1. Effect: All the LEDs color in face 1 turned to color index 0x12
+2. Parameters: Face number 0x01 represents the first face, the parameter color index 0x12 represents the color in the color pallet.
+3. Return Value: None
+4. A REFRESH display (command ID 03) is necessary to show the color. The command is suitable for brushing a single face, making special effects.
 
 
 # QCoo Wireless upgrade (google translated from *.docx file)
