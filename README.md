@@ -6,10 +6,10 @@ Shake your QCoo, automatically pair with your smartphone (both Andriod and iOS),
 
 QCoo is the world’s first high-tech gadget that puts classical games into 3D space and merges new tech with old game, using Bluetooth connectivity to bring you a portable game solution (6oz) that lightens your day.
 
-It is 3D games and AR game that make QCoo so special. At the moment, QCoo has two 3D games, Snake and Q Run. 
+It is 3D games and AR game that make QCoo so special. At the moment, QCoo has two 3D games, Snake and Q Run.
 And one AR game, which is AR Tower. We would like to put one more AR fighting game, Home defender: Armour fighters, into QCoo.
 
-Programmable, Compatible with Arduino. 
+Programmable, Compatible with Arduino.
 QCoo is programmable via Bluetooth.
 
 Wireless charging, 1.5 hours. 1500 mAh battery, last for 10 hours.
@@ -18,18 +18,18 @@ Arduino code for the QCoo cube, a LED cude with 5x5 LEDs on each of the six side
 
 
 
-# QCoo Protocol 
+# QCoo Protocol
 
-(Imporoved Protocol documentation based on QCoo Protocol.docx and the google translated PDF file) 
+(Imporoved Protocol documentation based on QCoo Protocol.docx and the google translated PDF file)
 
 ## Description
 
 QCoo hardware is Arduino compatible, and it has the same bootloader as Arduino UNO. You can use Arduino IDE update your firmware.
 
-What’s QCoo  : 
-QCoo is a display device which can community via BLE with smart phones. 
+What’s QCoo  :
+QCoo is a display device which can community via BLE with smart phones.
 The smart phone can send commands to QCoo to control leds brightness, color, position etc.
-QCoo is not only a receiver of commands, QCoo will send the gyro data to smart phones via BLE for gesture information and position changes. 
+QCoo is not only a receiver of commands, QCoo will send the gyro data to smart phones via BLE for gesture information and position changes.
 Every time a smart phone sends a command to QCoo, QCoo  will send back an OK message, if QCoo has executed the command successfully. This ensures a robust communication.
 
 
@@ -42,9 +42,9 @@ The following protocol defines the supported commands and queries:
 
 ### 1. Commands
 
-1. Control LED method 1
-2. Control LED method 2
-3. Control LED method 3
+1. Control LED method 1 - LED index
+2. Control LED method 2 -
+3. Control LED method 3 - Face number
 4. Refresh display
 5. Set brightness
 6. Change effects
@@ -82,7 +82,7 @@ QCoo has a hardware serial port and communication baud rate is 9600
 |0xF0 0x55  | 0x05  |0x00   |0x02   |0x41    |0x01        |0x7D       |
 
 
-Send ``F05505410241017D`` to QCoo hardware
+Send ``F05505000241017D`` to QCoo hardware
 1. Effect: The 125th LEDs is lighted, the color of it is the color index 1
 2. Parameters: The meaning of the two parameters represent the LED color index and the ID number of the LED.
 3. Return Value: None
@@ -91,29 +91,54 @@ Send ``F05505410241017D`` to QCoo hardware
 
 ### 2. control LED method 2: 0x11
 
-
 |Start code |length |Cmd ID |action |command |face number |color index |Data 1 |Data 2 |Data 3 |Data 4|
 |-----------|-------|-------|-------|--------|------------|------------|-------|-------|-------|------|
 |0XF0 0x55  |0x09   |0x00   |0x02   |0x11    |0x01        | 0x01       |0x01   |0x02   |0x02   |0x01  |
 
 Send ``F05509000211010101020201`` to QCoo Hardware:
 1. Effect: There will be some LEDs are lighted in the color of color index 1 on face 1
-2. Parameters: Data 1 - 4 stands for a LED on the selected face
+2. Parameters: Data 1 - 4 stands for a LED on the selected face. The 32 bits of the four bytes are a bit pattern for the active LEDs on the selected face. Eg 0x00 0x00 0x00 0x07 are the first three LEDs.
 3. Return Value: None
 4. Note: About the data 1 - 4 details, see the Software of QCoo Team
 
 
 ### 3. control LED method 3: 0x14
 
+|Start code |length |Cmd ID |action |command |color index |
+|-----------|-------|-------|-------|--------|------------|
+|0XF0 0x55  |0x04   |0x00   |0x02   |0x14    | 0x12       |
+
+Send data ``F055040002140112`` to QCoo hardware:
+1. Effect: All the LEDs turned to color index 0x12
+2. Parameters: The parameter color index 0x12 represents the color in the color pallet.
+3. Return Value: None
+4. The command is suitable for brushing a single face, making special effects.
+
+
+### FROM CODE control LED method 4: 0x13
+
+|Start code |length |Cmd ID |action |command |color index |
+|-----------|-------|-------|-------|--------|------------|
+|0XF0 0x55  |0x04   |0x00   |0x02   |0x14    | 0x10       |
+
+Send data ``F0550400021310`` to QCoo hardware:
+1. Effect: All the LEDs color are marked for color index 0x10.
+2. Parameters: The parameter color index 0x10 represents the color in the color pallet, a blue color.
+3. Return Value: None
+4. A REFRESH (command 03) is necessary to show the color.
+
+
+### FROM CODE control LED method 4: 0x12
+
 |Start code |length |Cmd ID |action |command |Face number |color index |
 |-----------|-------|-------|-------|--------|------------|------------|
-|0XF0 0x55  |0x04   |0x00   |0x02   |0x14    |0x01        | 0x12       |
+|0XF0 0x55  |0x04   |0x00   |0x02   |0x12    |0x01        | 0x12       |
 
-Send data ``F055050002140112`` to QCoo hardware:
+Send data ``F055050002120112`` to QCoo hardware:
 1. Effect: All the LEDs color in face 1 turned to color index 0x12
 2. Parameters: Face number 0x01 represents the first face, the parameter color index 0x12 represents the color in the color pallet.
 3. Return Value: None
-4. The command is suitable for brushing a single face, making special effects.
+4. A REFRESH (command 03) is necessary to show the color. The command is suitable for brushing a single face, making special effects.
 
 
 ### 4. refresh display: 0x03
@@ -123,7 +148,7 @@ Send data ``F055050002140112`` to QCoo hardware:
 |0XF0 0x55  |0x03   |0x00   |0x02   |0x03    |
 
 Send F05503000203 to QCoo hardware:
-1. Effect: force refresh of the current display 
+1. Effect: force refresh of the current display
 2. Parameters: The command has no parameters.
 3. Return Value: None
 4. Note: This command is not used frequently, because every command refreshes the display.
@@ -149,7 +174,7 @@ Send ``F0550400020420`` to QCoo hardware:
 
 Send ``F0550400020501`` to QCoo hardware:
 1. Effect: switch to the special effects mode, and show the effects of the special effects No 1
-2. Parameters: parameter the effects number, 0x00 is no effect, 0x01 - 0x04 are currently implemented
+2. Parameters: parameter the effects number, 0x00 is no effect, 0x01 - 0x05 are currently implemented
 3. Return value: F0 55 01 00 10 0D 0A
 4. Note: You have to send F0550400020500 with parameter = 0x00 to stop special effect mode if you want display something else.
 
@@ -236,7 +261,7 @@ Send ``F0550400024301`` to QCoo Hardware:
 |0xF0 0x55  |0x04   |0x00   |0x02   |0x17    |0x0A     |
 
 Send ``F055040002170A`` to QCoo hardware:
-1. Effect: QCoo will return the voltage 
+1. Effect: QCoo will return the voltage
 2. Parameters: 0x0A has no meaning, just to prevent false triggering.
 3. Return value: voltage value, for example: 4.2. The return value type is a String!
 4. Note: This voltage value can roughly reflect the battery power status. The return type is String type.
@@ -254,7 +279,7 @@ Send ``F055040002180A`` to QCoo Hardware:
 4. Note: Smart device shall Not use this command. Only developers shall query the charging state if necessary.
 
 
-# QCoo Wireless upgrade (google translated from *.docx file) 
+# QCoo Wireless upgrade (google translated from *.docx file)
 
 Wireless upgrade QCOO hardware method:
 1. Search for QCOO_ALPHA hardware;
@@ -264,14 +289,14 @@ Wireless upgrade QCOO hardware method:
 5. At this time QCOO hardware will be forced to reset once;
 6. In 100ms to the QUO UUID: FFE5 FFE9 write upgrade file can be
 
-Note: 
+Note:
 1. Check the file can be ignored, do not read back, otherwise the upgrade will fail.
 2. Do not recommend air upgrades, it is recommended to use the data cable to update the firmware.
 
 
 # QCoo Hardware parts
 
-* 150x WS2812 NeoPixel LEDs 
+* 150x WS2812 NeoPixel LEDs
 * 1x InvenSense MPU-6050 sensor contains a MEMS accelerometer and a MEMS gyro in a single chip
 * ...
 
