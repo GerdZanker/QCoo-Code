@@ -116,7 +116,7 @@ Send ``F05509000211010101020201`` to QCoo Hardware:
 |-----------|-------|-------|-------|--------|------------|
 |0XF0 0x55  |0x04   |0x00   |0x02   |0x14    | 0x12       |
 
-Send data ``F055040002140112`` to QCoo hardware:
+Send data ``F0550400021412`` to QCoo hardware:
 1. Effect: All the LEDs turned to color index 0x12
 2. Parameters: The parameter color index 0x12 represents the color in the color pallet.
 3. Return Value: None
@@ -265,7 +265,7 @@ Send ``F055040002180A`` to QCoo Hardware:
 
 |Start code |length |Cmd ID |action |command |color index |
 |-----------|-------|-------|-------|--------|------------|
-|0XF0 0x55  |0x04   |0x00   |0x02   |0x14    | 0x10       |
+|0XF0 0x55  |0x04   |0x00   |0x02   |0x13    | 0x10       |
 
 Send data ``F0550400021310`` to QCoo hardware:
 1. Effect: All the LEDs color are marked for color index 0x10.
